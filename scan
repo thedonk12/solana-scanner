@@ -1,0 +1,33 @@
+import requests
+import time
+
+# Function to fetch pairs from Dextools API
+def fetch_solana_pairs():
+    try:
+        url = "https://api.dextools.io/api/allPairsWithStats"
+        response = requests.get(url)
+        if response.status_code == 200:
+            pairs_data = response.json()
+            solana_pairs = [pair for pair in pairs_data if pair['blockchain'] == 'solana' and pair['stats']['liquidity'] >= 5000 and 5000 <= pair['stats']['marketCap'] <= 1000000 and pair['stats']['buy'] >= 50 and pair['stats']['volume'] >= 5000]
+            return solana_pairs
+        else:
+            print(f"Failed to fetch Solana pairs from Dextools API. Status code: {response.status_code}")
+            return []
+    except requests.RequestException as e:
+        print(f"Error fetching Solana pairs from Dextools API: {e}")
+        return []
+
+# Function to monitor Solana pairs
+def monitor_solana_pairs():
+    while True:
+        try:
+            solana_pairs = fetch_solana_pairs()
+            for pair in solana_pairs:
+                print(f"New Solana pair found: {pair['name']}")
+                # Implement your logic here to process the newly found pairs
+            time.sleep(300)  # Scan every 5 minutes
+        except Exception as e:
+            print(f"Error monitoring Solana pairs: {e}")
+
+# Start monitoring Solana pairs
+monitor_solana_pairs()
